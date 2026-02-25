@@ -1,8 +1,26 @@
-import React, { useState, useRef } from 'react';
-import { Copy, AlertTriangle, Wand2, X, CheckCircle2, Sparkles, User, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Copy, AlertTriangle, Wand2, X, CheckCircle2, Sparkles, User, MapPin, Settings, Lock, Save, LogOut } from 'lucide-react';
+
+const DEFAULT_WORD_LISTS = {
+  how: ['にじいろの', 'キラキラした', 'かっこいい', 'かわいい', 'おおきな', 'サイボーグの'],
+  who: ['ねこ', 'きょうりゅう', 'ロボット', 'うさぎ', 'くるま', 'お城'],
+  where: ['うちゅうで', 'うみの なかで', 'もりの なかで', 'おばけやしきで', 'そらの うえで']
+};
 
 export default function App() {
   // 状態管理
+  const [wordLists, setWordLists] = useState(() => {
+    const saved = localStorage.getItem('gazouseisei_word_lists');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return DEFAULT_WORD_LISTS;
+      }
+    }
+    return DEFAULT_WORD_LISTS;
+  });
+
   const [selectedWords, setSelectedWords] = useState({
     how: '', // どんな
     who: '', // だれが
@@ -11,12 +29,23 @@ export default function App() {
   const [freeText, setFreeText] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // 用意する単語リスト（先生側で事前準備する想定ですが、今回は固定）
-  const wordLists = {
-    how: ['にじいろの', 'キラキラした', 'かっこいい', 'かわいい', 'おおきな', 'サイボーグの'],
-    who: ['ねこ', 'きょうりゅう', 'ロボット', 'うさぎ', 'くるま', 'お城'],
-    where: ['うちゅうで', 'うみの なかで', 'もりの なかで', 'おばけやしきで', 'そらの うえで']
-  };
+  // 管理者モードの状態
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [loginError, setLoginError] = useState('');
+
+  // 編集用の状態
+  const [editingWords, setEditingWords] = useState({
+    how: '',
+    who: '',
+    where: ''
+  });
+
+  // 単語リストが更新されたらlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('gazouseisei_word_lists', JSON.stringify(wordLists));
+  }, [wordLists]);
 
   // 単語を選択する関数
   const handleSelect = (category, word) => {
@@ -65,11 +94,193 @@ export default function App() {
     }
   };
 
+  // 管理者ログイン処理
+  const handleAdminLogin = (e) => {
+    e.preventDefault();
+    if (passwordInput === '0807') {
+      setIsAdmin(true);
+      setShowAdminLogin(false);
+      setPasswordInput('');
+      setLoginError('');
+      // 編集用の状態を初期化
+      setEditingWords({
+        how: wordLists.how.join('\n'),
+        who: wordLists.who.join('\n'),
+        where: wordLists.where.join('\n')
+      });
+    } else {
+      setLoginError('パスワードが違います');
+    }
+  };
+
+  // 管理者ログアウト
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+  };
+
+  // 設定を保存
+  const handleSaveSettings = () => {
+    const parseWords = (text) => text.split('\n').map(w => w.trim()).filter(w => w !== '');
+
+    setWordLists({
+      how: parseWords(editingWords.how),
+      who: parseWords(editingWords.who),
+      where: parseWords(editingWords.where)
+    });
+
+    // 選択状態をリセット
+    setSelectedWords({ how: '', who: '', where: '' });
+
+    alert('設定を保存しました');
+  };
+
+  // 管理者ログイン画面のレンダリング
+  if (showAdminLogin) {
+    return (
+      <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full relative">
+          <button
+            onClick={() => {
+              setShowAdminLogin(false);
+              setPasswordInput('');
+              setLoginError('');
+            }}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          >
+            <X size={24} />
+          </button>
+
+          <div className="flex flex-col items-center mb-6">
+            <div className="bg-purple-100 p-3 rounded-full mb-4">
+              <Lock className="w-8 h-8 text-purple-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800">管理者ログイン</h2>
+          </div>
+
+          <form onSubmit={handleAdminLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">パスワード</label>
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="パスワードを入力"
+                autoFocus
+              />
+              {loginError && <p className="text-red-500 text-sm mt-1">{loginError}</p>}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              ログイン
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // 管理者設定画面のレンダリング
+  if (isAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans text-gray-800">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
+            <div className="flex items-center gap-3">
+              <Settings className="w-8 h-8 text-purple-600" />
+              <h1 className="text-2xl font-bold text-gray-800">管理者設定：単語リスト編集</h1>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleAdminLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+              >
+                <LogOut size={18} />
+                一般画面に戻る
+              </button>
+              <button
+                onClick={handleSaveSettings}
+                className="flex items-center gap-2 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-bold shadow-md"
+              >
+                <Save size={18} />
+                保存する
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
+            <p className="text-yellow-800 text-sm">
+              各項目に表示する単語を編集できます。<strong>1行に1つの単語</strong>を入力してください。
+              変更後は右上の「保存する」ボタンを押してください。（保存すると、現在トップ画面で選択中の単語はリセットされます）
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* どんな */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+              <h3 className="text-lg font-bold text-yellow-800 mb-3 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-yellow-600" />
+                どんな（ようす）
+              </h3>
+              <textarea
+                value={editingWords.how}
+                onChange={(e) => setEditingWords({ ...editingWords, how: e.target.value })}
+                className="w-full h-80 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none resize-y"
+                placeholder="例：&#13;&#10;にじいろの&#13;&#10;キラキラした"
+              />
+            </div>
+
+            {/* だれが */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+              <h3 className="text-lg font-bold text-green-800 mb-3 flex items-center gap-2">
+                <User className="w-5 h-5 text-green-600" />
+                だれが（なにが）
+              </h3>
+              <textarea
+                value={editingWords.who}
+                onChange={(e) => setEditingWords({ ...editingWords, who: e.target.value })}
+                className="w-full h-80 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none resize-y"
+                placeholder="例：&#13;&#10;ねこ&#13;&#10;きょうりゅう"
+              />
+            </div>
+
+            {/* どこで */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+              <h3 className="text-lg font-bold text-blue-800 mb-3 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                どこで（ばしょ）
+              </h3>
+              <textarea
+                value={editingWords.where}
+                onChange={(e) => setEditingWords({ ...editingWords, where: e.target.value })}
+                className="w-full h-80 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-y"
+                placeholder="例：&#13;&#10;うちゅうで&#13;&#10;うみの なかで"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 一般画面のレンダリング
   return (
-    <div className="min-h-screen bg-blue-50 p-4 md:p-8 font-sans text-gray-800">
+    <div className="min-h-screen bg-blue-50 p-4 md:p-8 font-sans text-gray-800 relative">
+
+      {/* 管理者設定ボタン（右上に配置） */}
+      <button
+        onClick={() => setShowAdminLogin(true)}
+        className="absolute top-4 right-4 md:top-8 md:right-8 text-gray-400 hover:text-purple-600 transition-colors p-2 rounded-full hover:bg-purple-100"
+        title="管理者設定"
+      >
+        <Settings size={24} />
+      </button>
 
       {/* ヘッダーとお約束 */}
-      <header className="max-w-6xl mx-auto mb-6">
+      <header className="max-w-6xl mx-auto mb-6 pt-8 md:pt-0">
         <div className="flex items-center gap-3 mb-4">
           <Wand2 className="w-10 h-10 text-purple-600" />
           <h1 className="text-3xl font-bold text-purple-800">まほうの ちゅうもんしょ</h1>
@@ -107,18 +318,19 @@ export default function App() {
                   どんな（ようす）
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {wordLists.how.map(word => (
+                  {wordLists.how.map((word, idx) => (
                     <button
-                      key={word}
+                      key={`how-${idx}`}
                       onClick={() => handleSelect('how', word)}
                       className={`px-4 py-2 rounded-full font-bold border-2 transition-all ${selectedWords.how === word
-                          ? 'bg-yellow-400 border-yellow-500 text-yellow-900 scale-105 shadow-md'
-                          : 'bg-white border-yellow-200 text-yellow-800 hover:bg-yellow-100 hover:border-yellow-300 shadow-sm'
+                        ? 'bg-yellow-400 border-yellow-500 text-yellow-900 scale-105 shadow-md'
+                        : 'bg-white border-yellow-200 text-yellow-800 hover:bg-yellow-100 hover:border-yellow-300 shadow-sm'
                         }`}
                     >
                       {word}
                     </button>
                   ))}
+                  {wordLists.how.length === 0 && <span className="text-sm text-gray-500">単語がありません</span>}
                 </div>
               </div>
 
@@ -129,18 +341,19 @@ export default function App() {
                   だれが（なにが）
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {wordLists.who.map(word => (
+                  {wordLists.who.map((word, idx) => (
                     <button
-                      key={word}
+                      key={`who-${idx}`}
                       onClick={() => handleSelect('who', word)}
                       className={`px-4 py-2 rounded-full font-bold border-2 transition-all ${selectedWords.who === word
-                          ? 'bg-green-400 border-green-500 text-green-900 scale-105 shadow-md'
-                          : 'bg-white border-green-200 text-green-800 hover:bg-green-100 hover:border-green-300 shadow-sm'
+                        ? 'bg-green-400 border-green-500 text-green-900 scale-105 shadow-md'
+                        : 'bg-white border-green-200 text-green-800 hover:bg-green-100 hover:border-green-300 shadow-sm'
                         }`}
                     >
                       {word}
                     </button>
                   ))}
+                  {wordLists.who.length === 0 && <span className="text-sm text-gray-500">単語がありません</span>}
                 </div>
               </div>
 
@@ -151,18 +364,19 @@ export default function App() {
                   どこで（ばしょ）
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {wordLists.where.map(word => (
+                  {wordLists.where.map((word, idx) => (
                     <button
-                      key={word}
+                      key={`where-${idx}`}
                       onClick={() => handleSelect('where', word)}
                       className={`px-4 py-2 rounded-full font-bold border-2 transition-all ${selectedWords.where === word
-                          ? 'bg-blue-400 border-blue-500 text-blue-900 scale-105 shadow-md'
-                          : 'bg-white border-blue-200 text-blue-800 hover:bg-blue-100 hover:border-blue-300 shadow-sm'
+                        ? 'bg-blue-400 border-blue-500 text-blue-900 scale-105 shadow-md'
+                        : 'bg-white border-blue-200 text-blue-800 hover:bg-blue-100 hover:border-blue-300 shadow-sm'
                         }`}
                     >
                       {word}
                     </button>
                   ))}
+                  {wordLists.where.length === 0 && <span className="text-sm text-gray-500">単語がありません</span>}
                 </div>
               </div>
             </div>
