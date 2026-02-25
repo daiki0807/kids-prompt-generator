@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Copy, AlertTriangle, Wand2, X, CheckCircle2 } from 'lucide-react';
+import { Copy, AlertTriangle, Wand2, X, CheckCircle2, Sparkles, User, MapPin } from 'lucide-react';
 
 export default function App() {
   // 状態管理
@@ -99,18 +99,21 @@ export default function App() {
               ことばを えらぼう（ポチッと おす）
             </h2>
 
-            <div className="space-y-5">
+            <div className="space-y-6">
               {/* どんな */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-500 mb-2">どんな（ようす）</h3>
+              <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                <h3 className="text-md font-bold text-yellow-800 mb-3 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-yellow-600" />
+                  どんな（ようす）
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {wordLists.how.map(word => (
                     <button
                       key={word}
                       onClick={() => handleSelect('how', word)}
                       className={`px-4 py-2 rounded-full font-bold border-2 transition-all ${selectedWords.how === word
-                          ? 'bg-yellow-300 border-yellow-500 text-yellow-900 scale-105 shadow-md'
-                          : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-yellow-100 hover:border-yellow-300'
+                          ? 'bg-yellow-400 border-yellow-500 text-yellow-900 scale-105 shadow-md'
+                          : 'bg-white border-yellow-200 text-yellow-800 hover:bg-yellow-100 hover:border-yellow-300 shadow-sm'
                         }`}
                     >
                       {word}
@@ -120,16 +123,19 @@ export default function App() {
               </div>
 
               {/* だれが */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-500 mb-2">だれが（なにが）</h3>
+              <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+                <h3 className="text-md font-bold text-green-800 mb-3 flex items-center gap-2">
+                  <User className="w-5 h-5 text-green-600" />
+                  だれが（なにが）
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {wordLists.who.map(word => (
                     <button
                       key={word}
                       onClick={() => handleSelect('who', word)}
                       className={`px-4 py-2 rounded-full font-bold border-2 transition-all ${selectedWords.who === word
-                          ? 'bg-green-300 border-green-500 text-green-900 scale-105 shadow-md'
-                          : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-green-100 hover:border-green-300'
+                          ? 'bg-green-400 border-green-500 text-green-900 scale-105 shadow-md'
+                          : 'bg-white border-green-200 text-green-800 hover:bg-green-100 hover:border-green-300 shadow-sm'
                         }`}
                     >
                       {word}
@@ -139,16 +145,19 @@ export default function App() {
               </div>
 
               {/* どこで */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-500 mb-2">どこで（ばしょ）</h3>
+              <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                <h3 className="text-md font-bold text-blue-800 mb-3 flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-blue-600" />
+                  どこで（ばしょ）
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {wordLists.where.map(word => (
                     <button
                       key={word}
                       onClick={() => handleSelect('where', word)}
                       className={`px-4 py-2 rounded-full font-bold border-2 transition-all ${selectedWords.where === word
-                          ? 'bg-blue-300 border-blue-500 text-blue-900 scale-105 shadow-md'
-                          : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-blue-100 hover:border-blue-300'
+                          ? 'bg-blue-400 border-blue-500 text-blue-900 scale-105 shadow-md'
+                          : 'bg-white border-blue-200 text-blue-800 hover:bg-blue-100 hover:border-blue-300 shadow-sm'
                         }`}
                     >
                       {word}
@@ -233,10 +242,10 @@ export default function App() {
               onClick={handleCopy}
               disabled={!generatePrompt()}
               className={`w-full py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-2 transition-all transform active:scale-95 ${!generatePrompt()
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : copied
-                    ? 'bg-green-500 text-white shadow-lg'
-                    : 'bg-purple-600 text-white hover:bg-purple-500 hover:shadow-xl shadow-md'
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : copied
+                  ? 'bg-green-500 text-white shadow-lg'
+                  : 'bg-purple-600 text-white hover:bg-purple-500 hover:shadow-xl shadow-md'
                 }`}
             >
               {copied ? (
