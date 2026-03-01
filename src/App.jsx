@@ -317,6 +317,13 @@ export default function App() {
                   <Sparkles className="w-5 h-5 text-yellow-600" />
                   どんな（ようす）
                 </h3>
+                <input
+                  type="text"
+                  value={selectedWords.how}
+                  onChange={(e) => handleSelect('how', e.target.value)}
+                  placeholder="じぶんで かく"
+                  className="w-full text-lg p-3 mb-3 border-2 border-yellow-200 rounded-xl focus:border-yellow-500 focus:outline-none transition-colors bg-white font-bold text-yellow-900"
+                />
                 <div className="flex flex-wrap gap-2">
                   {wordLists.how.map((word, idx) => (
                     <button
@@ -340,6 +347,13 @@ export default function App() {
                   <User className="w-5 h-5 text-green-600" />
                   だれが（なにが）
                 </h3>
+                <input
+                  type="text"
+                  value={selectedWords.who}
+                  onChange={(e) => handleSelect('who', e.target.value)}
+                  placeholder="じぶんで かく"
+                  className="w-full text-lg p-3 mb-3 border-2 border-green-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors bg-white font-bold text-green-900"
+                />
                 <div className="flex flex-wrap gap-2">
                   {wordLists.who.map((word, idx) => (
                     <button
@@ -363,6 +377,13 @@ export default function App() {
                   <MapPin className="w-5 h-5 text-blue-600" />
                   どこで（ばしょ）
                 </h3>
+                <input
+                  type="text"
+                  value={selectedWords.where}
+                  onChange={(e) => handleSelect('where', e.target.value)}
+                  placeholder="じぶんで かく"
+                  className="w-full text-lg p-3 mb-3 border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors bg-white font-bold text-blue-900"
+                />
                 <div className="flex flex-wrap gap-2">
                   {wordLists.where.map((word, idx) => (
                     <button
